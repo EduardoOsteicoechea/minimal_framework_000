@@ -26,71 +26,35 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             REMOTE_REPO_URL="https://github.com/EduardoOsteicoechea/minimal_framework_000"
-            TEMP_CLONE_DIR="/tmp/static_repo_$(date +%s)" # Unique temporary directory for cloning
-            DEST_DIR="/var/www/html" # Destination directory on the EC2 instance
+            TEMP_CLONE_DIR="/tmp/static_repo_$(date +%s)"
+            DEST_DIR="/var/www/html"
 
+            # Ensure the destination directory exists and has correct permissions
             sudo mkdir -p "$DEST_DIR"
             sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} "$DEST_DIR"
-            # Set appropriate permissions for web content (read/execute for others, full for owner).
             sudo chmod -R 755 "$DEST_DIR"
 
             echo "Cloning repository to temporary directory: $TEMP_CLONE_DIR"
             git clone "$REMOTE_REPO_URL" "$TEMP_CLONE_DIR"
 
             if [ ! -d "$TEMP_CLONE_DIR" ]; then
-                echo "Error: Failed to clone repository $REMOTE_REPO_URL"
-                exit 1
+              echo "Error: Failed to clone repository $REMOTE_REPO_URL"
+              exit 1
             fi
-            
-            echo "Replicating folder structure and copying .php files and sqlite DB..."
-            
-            # Find and copy .php files, replicating the directory structure
-            find "$TEMP_CLONE_DIR" -type f -name "*.php" -exec bash -c '
-              file_path="$1"
-              temp_dir="$2"
-              dest_dir="$3"
-              
-              # Get the path to the file relative to the cloned directory
-              relative_path="${file_path#"$temp_dir"}"
-              
-              # Get the destination directory, creating it if it doesn't exist
-              dest_path="$dest_dir$(dirname "$relative_path")"
-              
-              sudo mkdir -p "$dest_path"
-              
-              # Copy the file
-              sudo cp "$file_path" "$dest_path"
-            ' _ {} "$TEMP_CLONE_DIR" "$DEST_DIR" \;
 
-            # Find and copy the sqlite database file, if it exists
-            find "$TEMP_CLONE_DIR" -type f -name "*.sqlite" -exec bash -c '
-              file_path="$1"
-              temp_dir="$2"
-              dest_dir="$3"
-              
-              relative_path="${file_path#"$temp_dir"}"
-              
-              dest_path="$dest_dir$(dirname "$relative_path")"
-              
-              sudo mkdir -p "$dest_path"
-              
-              sudo cp "$file_path" "$dest_path"
-            ' _ {} "$TEMP_CLONE_DIR" "$DEST_DIR" \;
-            
-            # Clear old .css and .js files to ensure a clean deployment
-            sudo find "$DEST_DIR" -type f \( -name "*.css" -o -name "*.js" \) -delete
+            # Copy all content from the cloned repo to the web root
+            echo "Copying all content to $DEST_DIR"
+            sudo cp -r "$TEMP_CLONE_DIR"/* "$DEST_DIR"/
 
-            # Copying new .css and .js files to /var/www/html/ (flattening structure)...
-            sudo find "$TEMP_CLONE_DIR" -type f \( -name "*.css" -o -name "*.js" \) -exec cp {} "$DEST_DIR"/ \;
-            
+            # Clean up the temporary directory
             sudo rm -rf "$TEMP_CLONE_DIR"
-
+                  
             sudo rm -rf /var/cache/nginx/*
-
+                  
             echo "Restarting Nginx..."
             sudo systemctl restart nginx
             echo "Reloading Nginx configuration..."
-            sudo systemctl reload nginx  
+            sudo systemctl reload nginx 
 
       - name: Wait for deployment
         run: |
