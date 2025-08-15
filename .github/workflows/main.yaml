@@ -1,0 +1,94 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workflow file (no repo content needed on runner for this strategy)
+        uses: actions/checkout@v3
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Static Files via EC2 SSH Clone and Move
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            REMOTE_REPO_URL="https://github.com/EduardoOsteicoechea/blazing_rust_000_static.git"
+            TEMP_CLONE_DIR="/tmp/static_repo_$(date +%s)" # Unique temporary directory for cloning
+            DEST_DIR="/var/www/html" # Destination directory on the EC2 instance
+
+            sudo mkdir -p "$DEST_DIR"
+            sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} "$DEST_DIR"
+            # Set appropriate permissions for web content (read/execute for others, full for owner).
+            sudo chmod -R 755 "$DEST_DIR"
+
+            echo "Cloning repository to temporary directory: $TEMP_CLONE_DIR"
+            git clone "$REMOTE_REPO_URL" "$TEMP_CLONE_DIR"
+
+            if [ ! -d "$TEMP_CLONE_DIR" ]; then
+                echo "Error: Failed to clone repository $REMOTE_REPO_URL"
+                exit 1
+            fi
+            
+            echo "Replicating folder structure and copying .php files and sqlite DB..."
+            
+            # Find and copy .php files, replicating the directory structure
+            find "$TEMP_CLONE_DIR" -type f -name "*.php" -exec bash -c '
+              # Get the path to the file relative to the cloned directory
+              file_path="$1"
+              relative_path="${file_path#'"$TEMP_CLONE_DIR"'}"
+              
+              # Get the destination directory, creating it if it doesn't exist
+              dest_dir="'"$DEST_DIR"'"
+              dest_path="$dest_dir$(dirname "$relative_path")"
+              
+              sudo mkdir -p "$dest_path"
+              
+              # Copy the file
+              sudo cp "$file_path" "$dest_path"
+            ' _ {} \;
+
+            # Find and copy the sqlite database file, if it exists
+            find "$TEMP_CLONE_DIR" -type f -name "*.sqlite" -exec bash -c '
+              file_path="$1"
+              relative_path="${file_path#'"$TEMP_CLONE_DIR"'}"
+              
+              dest_dir="'"$DEST_DIR"'"
+              dest_path="$dest_dir$(dirname "$relative_path")"
+              
+              sudo mkdir -p "$dest_path"
+              
+              sudo cp "$file_path" "$dest_path"
+            ' _ {} \;
+            
+            # Clear old .css and .js files to ensure a clean deployment
+            sudo find "$DEST_DIR" -type f \( -name "*.css" -o -name "*.js" \) -delete
+
+            # Copying new .css and .js files to /var/www/html/ (flattening structure)...
+            sudo find "$TEMP_CLONE_DIR" -type f \( -name "*.css" -o -name "*.js" \) -exec cp {} "$DEST_DIR"/ \;
+            
+            sudo rm -rf "$TEMP_CLONE_DIR"
+
+            sudo rm -rf /var/cache/nginx/*
+
+            echo "Restarting Nginx..."
+            sudo systemctl restart nginx
+            echo "Reloading Nginx configuration..."
+            sudo systemctl reload nginx
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting 5 seconds for Nginx to settle..."
+          sleep 5
