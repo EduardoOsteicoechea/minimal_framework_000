@@ -47,22 +47,29 @@ jobs:
             # Find and copy .php files, replicating the directory structure
             find "$TEMP_CLONE_DIR" -type f -name "*.php" -exec bash -c '
               file_path="$1"
-              relative_path="${file_path#'"$2"'}"
-              
+              temp_dir="$2"
               dest_dir="$3"
+              
+              # Get the path to the file relative to the cloned directory
+              relative_path="${file_path#"$temp_dir"}"
+              
+              # Get the destination directory, creating it if it doesn't exist
               dest_path="$dest_dir$(dirname "$relative_path")"
               
               sudo mkdir -p "$dest_path"
               
+              # Copy the file
               sudo cp "$file_path" "$dest_path"
             ' _ {} "$TEMP_CLONE_DIR" "$DEST_DIR" \;
 
             # Find and copy the sqlite database file, if it exists
             find "$TEMP_CLONE_DIR" -type f -name "*.sqlite" -exec bash -c '
               file_path="$1"
-              relative_path="${file_path#'"$2"'}"
-              
+              temp_dir="$2"
               dest_dir="$3"
+              
+              relative_path="${file_path#"$temp_dir"}"
+              
               dest_path="$dest_dir$(dirname "$relative_path")"
               
               sudo mkdir -p "$dest_path"
