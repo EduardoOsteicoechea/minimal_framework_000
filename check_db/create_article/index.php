@@ -1,18 +1,15 @@
 <?php
 
-try
-{
+echo "starting";
 
-  include '../_/db/actions/create_article_001.php';
-  create_article_001("test_article", '
-  
-  {
+try {
+  include '../../_/db/actions/create_article_001.php';
+
+  create_article_001("test_article", '{
     "title":"test article",
     "content":"test content"
-    }
     
-    '); 
-    
-  } catch (Exception $e) {
-    echo $e->getMessage();
+    }');
+} catch (Exception $e) {
+  echo $e->getMessage();
 }
