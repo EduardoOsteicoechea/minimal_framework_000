@@ -22,7 +22,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
-          username: ${{ secrets.USERNAME }}
+          username: ${{ secrets.USERNAME }} 
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             REMOTE_REPO_URL="https://github.com/EduardoOsteicoechea/blazing_rust_000_static.git"
