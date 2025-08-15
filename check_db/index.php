@@ -1,6 +1,6 @@
 <?php
 
-$databaseFile = '../_/db/my_database.sqlite';
+$databaseFile = '../_/db/files/my_database.sqlite';
 
 try {
   $pdo = new PDO("sqlite:$databaseFile");

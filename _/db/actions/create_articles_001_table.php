@@ -1,8 +1,10 @@
 <?php
 
-include_once 'module_includes.php';
+function create_articles_001_table_001()
+{
+  include_once '_include.php';
 
-try {
+  try {
     $pdo = new PDO("sqlite:$db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $sqlCreateTable = "
@@ -17,12 +19,9 @@ try {
 
     $pdo->exec($sqlCreateTable);
     echo "Table 'users' created successfully (or verified if it already existed)!<br>";
-
-
-} catch (PDOException $e) {
+  } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
+  }
+
+  $pdo = null;
 }
-
-$pdo = null;
-
-?>
