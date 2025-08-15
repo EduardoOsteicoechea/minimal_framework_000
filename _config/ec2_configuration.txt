@@ -18,6 +18,8 @@ sudo apt install php -y
 
 sudo apt install php-fpm -y
 
+sudo apt install php-sqlite3 -y
+
 apt-cache show php
 
 apt-cache show php-fpm
