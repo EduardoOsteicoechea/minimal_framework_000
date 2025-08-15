@@ -1,9 +1,12 @@
 <?php
 // ... (Your existing code for database connection and table creation) ...
+$databaseFile = __DIR__ . '/my_database.sqlite';
 
 try {
-    // ... (Your existing code for database connection and table creation) ...
+    $pdo = new PDO("sqlite:$databaseFile");
 
+    // Set error mode to exception for better error handling
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // Select all data from the 'users' table
     $sqlSelectData = "SELECT id, name, email FROM users";
 
