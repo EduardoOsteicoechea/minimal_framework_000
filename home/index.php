@@ -7,13 +7,16 @@ echo '
 
 
 <h1>
-  Eduardo Osteicoechea
-</h1>
-
+  Eduardo Osteicoechea - AI Platforms for BIM and AEC Developer
+</h2>
 
 <h2>
-  This app was developed with Eduardo Osteicoechea\'s Minimal Framework
+  This page showcases Eduardo Osteicoechea\'s Minimal Framework for web applications.
 </h2>
+
+<p>
+  
+</p>
 
 <p>
   Core values:
