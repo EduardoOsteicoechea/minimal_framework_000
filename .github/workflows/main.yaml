@@ -29,7 +29,6 @@ jobs:
             TEMP_CLONE_DIR="/tmp/static_repo_$(date +%s)"
             DEST_DIR="/var/www/html"
 
-            # Ensure the destination directory exists and has correct permissions
             sudo mkdir -p "$DEST_DIR"
             sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} "$DEST_DIR"
             sudo chmod -R 755 "$DEST_DIR"
