@@ -1,3 +1,4 @@
-<?php 
-  echo "thanks lord";
+<?php
+header("Location: /home");
+exit; 
 ?>
