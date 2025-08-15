@@ -1,6 +1,7 @@
 <?php
 
 echo "starting";
+echo "<br><br>";
 
 try {
   include '../../_/db/actions/create_article_001.php';
@@ -8,7 +9,7 @@ try {
   create_article_001("test_article", '{
     "title":"test article",
     "content":"test content"
-    
+
     }');
 } catch (Exception $e) {
   echo $e->getMessage();
