@@ -1,11 +1,17 @@
 <?php
 
-function create_article_001($name, $json)
+function create_article_001($root, $name, $json)
 {
-  include_once '_include.php';
+  include '_include.php';
 
   try {
-    $pdo = new PDO("sqlite:$db");
+    echo "Preparing to Open Database";
+    echo "<br><br>";
+    
+    $pdo = new PDO("sqlite:.$db.");
+    echo "Opened Database";
+    echo "<br><br>";
+
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $sql = "
@@ -15,6 +21,8 @@ function create_article_001($name, $json)
           VALUES
             ('.$name.','.$json.')
     ";
+
+    echo $sql . "<br><br>";
 
     $pdo->exec($sql);
     echo "Initial data inserted into 'users' table!<br>";

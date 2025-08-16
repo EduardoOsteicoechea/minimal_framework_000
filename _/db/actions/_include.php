@@ -1,1 +1,0 @@
-$db = '../files/db_001.sqlite';
