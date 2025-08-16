@@ -37,7 +37,7 @@ class ViewTables extends TOOL
     string $methodDescription,
     string $dbPath
   ) {
-    parent::__construct($workflow, $methodDescription);
+    parent::__construct($workflow, $methodDescription); 
     $this->Database_path = $dbPath;
 
     $this->Result = view_db_tables($this->Database_path);
