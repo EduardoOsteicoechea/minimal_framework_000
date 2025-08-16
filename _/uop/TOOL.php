@@ -21,7 +21,7 @@ class TOOL
 
   public function AddTest($test)
   {
-    $this->Tests[] = $test;
+    $this->Tests[] = $test; 
   }
 
   public function Test(): void
