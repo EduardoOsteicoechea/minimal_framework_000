@@ -19,7 +19,7 @@ class TOOL
     $this->Tests[] = function () { if ($this->Result === null) throw new Exception("Test failed: The result is null.");};
   }
 
-  public function AppendTests($test)
+  public function AddTest($test)
   {
     $this->Tests[] = $test;
   }
